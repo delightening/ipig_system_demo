@@ -1,0 +1,21 @@
+.env
+.env.*
+**/target
+**/node_modules
+**/.env
+**/.env.*
+**/dist
+**/build
+**/.next
+
+# === secrets ===
+.env
+.env.*
+!.env.example
+*_dump.sql
+*.dump.sql
+*.sql
+!**/migrations/*.sql
+
+# app secrets files (optional)
+secrets/

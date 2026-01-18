@@ -1,0 +1,127 @@
+# ==============================================
+# iPig System - Demo Docker Compose
+# ==============================================
+# Usage:
+#   cp .env.demo .env
+#   docker compose -f docker-compose.demo.yml up -d --build
+#
+# Demo Accounts:
+#   - demo_admin / demo_admin (管理員)
+# ==============================================
+
+services:
+  # =========================
+  # PostgreSQL Database
+  # =========================
+  db:
+    image: postgres:16-alpine
+    container_name: ipig-demo-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: ipig_demo
+      POSTGRES_INITDB_ARGS: "--locale=C"
+    volumes:
+      - demo_postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres -d ipig_demo" ]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+      start_period: 10s
+    restart: unless-stopped
+
+  # =========================
+  # Rust Backend API
+  # =========================
+  api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: ipig-demo-api
+    environment:
+      # Demo Mode
+      DEMO_MODE: "true"
+
+      # Server
+      HOST: "0.0.0.0"
+      PORT: "8000"
+
+      # Database (inside docker network)
+      DATABASE_URL: postgres://postgres:postgres@db:5432/ipig_demo
+      DATABASE_MAX_CONNECTIONS: "10"
+      DATABASE_RETRY_ATTEMPTS: "15"
+      DATABASE_RETRY_DELAY_SECONDS: "3"
+
+      # JWT
+      JWT_SECRET: demo_jwt_secret_for_testing_only
+      JWT_EXPIRATION_HOURS: "24"
+      JWT_REFRESH_EXPIRATION_DAYS: "7"
+
+      # Disable external integrations
+      ENABLE_GOOGLE_SYNC: "false"
+      ENABLE_SMTP: "false"
+
+      # SMTP (disabled)
+      SMTP_HOST: ""
+      SMTP_PORT: "587"
+      SMTP_FROM_EMAIL: "noreply@demo.local"
+      SMTP_FROM_NAME: "iPig Demo"
+
+      # App URL
+      APP_URL: "http://localhost:8080"
+
+    ports:
+      - "8000:8000"
+    volumes:
+      - demo_uploads:/app/uploads
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # =========================
+  # React Frontend (Prod build served by nginx)
+  # =========================
+  web:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        VITE_API_BASE_URL: http://localhost:8000
+    container_name: ipig-demo-web
+    ports:
+      - "8080:80"
+    depends_on:
+      - api
+    restart: unless-stopped
+
+  # =========================
+  # React Frontend Dev (Vite) - Optional
+  # =========================
+  web-dev:
+    image: node:20-alpine
+    container_name: ipig-demo-web-dev
+    working_dir: /app
+    environment:
+      VITE_API_BASE_URL: http://localhost:8000
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    ports:
+      - "5173:5173"
+    command: >
+      sh -c "npm install -g npm@latest && npm install && npm run dev -- --host 0.0.0.0 --port 5173"
+    depends_on:
+      - api
+    profiles:
+      - dev
+
+# =========================
+# Volumes
+# =========================
+volumes:
+  demo_postgres_data:
+  demo_uploads:
