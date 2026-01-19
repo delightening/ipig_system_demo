@@ -76,6 +76,7 @@ pub fn api_routes(state: AppState) -> Router {
         .route("/protocols/:id/versions", get(handlers::get_protocol_versions))
         .route("/protocols/:id/status-history", get(handlers::get_protocol_status_history))
         .route("/protocols/:id/animal-stats", get(handlers::get_protocol_animal_stats))
+        .route("/protocols/:id/export-pdf", get(handlers::export_protocol_pdf))
         // Review
         .route("/reviews/assignments", get(handlers::list_review_assignments).post(handlers::assign_reviewer))
         .route("/reviews/comments", get(handlers::list_review_comments).post(handlers::create_review_comment))
@@ -241,6 +242,12 @@ pub fn api_routes(state: AppState) -> Router {
         .route("/facilities/pens/:id", get(handlers::get_pen).put(handlers::update_pen).delete(handlers::delete_pen))
         .route("/facilities/departments", get(handlers::list_departments).post(handlers::create_department))
         .route("/facilities/departments/:id", get(handlers::get_department).put(handlers::update_department).delete(handlers::delete_department))
+        // ============================================
+        // Electronic Signatures & Annotations (GLP Compliance)
+        // ============================================
+        .route("/signatures/sacrifice/:id", post(handlers::sign_sacrifice_record).get(handlers::get_sacrifice_signature_status))
+        .route("/signatures/observation/:id", post(handlers::sign_observation_record))
+        .route("/annotations/:record_type/:record_id", get(handlers::get_record_annotations).post(handlers::add_record_annotation))
         .route_layer(middleware::from_fn_with_state(state.clone(), auth_middleware))
         .with_state(state);
 
