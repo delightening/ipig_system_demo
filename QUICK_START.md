@@ -1,6 +1,39 @@
 # 快速啟動指南
 
-## 方式 1: Docker Compose（推薦）
+## Demo 模式快速啟動（推薦第一次使用）
+
+### 前置條件
+- 啟動 Docker Desktop
+
+### 設定步驟
+```powershell
+# 1. 複製 demo 環境設定檔
+cp .env.demo .env
+
+# 2. 建立 secrets 目錄
+mkdir secrets
+
+# 3. 複製範例 service account 檔案 (Google Calendar 功能已停用，僅需檔案存在)
+cp secrets.example/google-service-account.json.example secrets/google-service-account.json
+
+# 4. 啟動服務
+docker compose up -d
+
+# 5. 查看日誌確認啟動成功
+docker compose logs -f
+```
+
+### 服務入口
+- 前端: http://localhost:8080
+- API: http://localhost:8000
+
+### 預設帳號
+- 帳號: admin@ipig.local
+- 密碼: admin123
+
+---
+
+## 方式 1: Docker Compose（完整設定）
 
 ### 前置條件
 - 啟動 Docker Desktop
