@@ -98,95 +98,15 @@
 
 ## 快速開始
 
-### 使用 Docker Compose（推薦）
+詳細的啟動說明請參考 **[QUICK_START.md](QUICK_START.md)**。
 
-#### 1. 設定環境變數
-
-在項目根目錄創建 `.env` 文件，複製 `backend/env.sample` 並填入實際值：
-
+**快速預覽（Docker Demo 模式）：**
 ```bash
-# 複製範例文件
-cp backend/env.sample .env
-
-# 編輯 .env 文件，填入必要的環境變數
+cp .env.demo .env && mkdir secrets && cp secrets.example/google-service-account.json.example secrets/google-service-account.json && docker compose up -d
 ```
 
-**重要環境變數說明：**
-
-| 變數 | 說明 |
-|-----|------|
-| `POSTGRES_PASSWORD` | 資料庫密碼（請使用強密碼） |
-| `JWT_SECRET` | JWT 簽名密鑰（必須使用安全的隨機值） |
-| `SMTP_HOST` | SMTP 伺服器（可選，郵件通知用） |
-
-**生成安全的 JWT_SECRET（PowerShell）：**
-
-```powershell
-$jwt = [Convert]::ToBase64String((1..64 | ForEach-Object { Get-Random -Minimum 0 -Maximum 256 }))
-Write-Output $jwt
-```
-
-#### 2. 啟動服務
-
-```bash
-# 啟動所有服務
-docker-compose up -d
-
-# 查看日誌
-docker-compose logs -f
-
-# 停止服務
-docker-compose down
-```
-
-**服務入口：**
-| 服務 | 網址 |
-|-----|------|
-| 前端 | http://localhost:8080 |
-| API | http://localhost:3000 |
-| 資料庫 | localhost:5433 |
-
-### 本地開發
-
-#### 後端
-
-```bash
-cd backend
-
-# 建立 .env 檔案
-cp env.sample .env
-# 編輯 .env 設定資料庫連線等
-
-# 安裝 SQLx CLI
-cargo install sqlx-cli
-
-# 建立資料庫
-sqlx database create
-
-# 執行 migrations
-sqlx migrate run
-
-# 啟動開發伺服器
-cargo run
-```
-
-#### 前端
-
-```bash
-cd frontend
-
-# 安裝相依套件
-npm install
-
-# 啟動開發伺服器
-npm run dev
-```
-
-## 預設帳號
-
-| 帳號 | 密碼 |
-|-----|------|
-| admin@ipig.local | admin123 |
+- 前端: http://localhost:8080
+- 預設帳號: `admin@ipig.local` / `admin123`
 
 ## API 文件
 
